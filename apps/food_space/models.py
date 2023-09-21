@@ -1,10 +1,10 @@
 from django.db import models
+from django_resized import ResizedImageField
 from multiselectfield import MultiSelectField
 from django.utils import timezone
-from django.contrib.auth.admin import User
-
 from apps.food_space.constants import FOOD_SPACE_AMENITIES_CHOICES, FOOD_SPACE_TYPE_CHOICES, CUISINE_CHOICES, \
     MEAL_CHOICES, PRICE_CHOICES, RATING_CHOICES
+from apps.users.models import CustomUser
 
 
 class FoodSpace(models.Model):
@@ -45,7 +45,7 @@ class Image(models.Model):
         verbose_name = 'Изображение места питания'
         verbose_name_plural = 'Изображения места питания'
 
-    image = models.ImageField(upload_to='food_spaces', verbose_name='Изображение')
+    images = ResizedImageField(size=[300, 300], null=True, blank=True, quality=75)
     food_space = models.ForeignKey(FoodSpace, on_delete=models.CASCADE, related_name='images')
 
     def __str__(self):
@@ -57,7 +57,7 @@ class Review(models.Model):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Пользователь')
     food_space = models.ForeignKey(FoodSpace, on_delete=models.CASCADE, verbose_name='Место питания')
     staff_rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES, verbose_name="Оценка персонала")
     food_quality_rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES, verbose_name="Оценка качества пищи")
@@ -75,7 +75,7 @@ class Reservation(models.Model):
         verbose_name_plural = 'Бронь столиков'
 
     food_space = models.ForeignKey(FoodSpace, on_delete=models.CASCADE, verbose_name='Место питания')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Пользователь')
     date = models.DateTimeField(verbose_name='Дата и время')
     guests = models.PositiveIntegerField(verbose_name='Количество гостей')
 
@@ -96,12 +96,13 @@ class MenuItem(models.Model):
     def __str__(self):
         return self.name
 
+
 class Order(models.Model):
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Пользователь')
     food_space = models.ForeignKey(FoodSpace, on_delete=models.CASCADE, verbose_name='Место питания')
     order_date = models.DateTimeField(default=timezone.now, verbose_name='Дата заказа')
     is_completed = models.BooleanField(default=False, verbose_name='Завершен')
@@ -111,6 +112,7 @@ class Order(models.Model):
 
     def get_total_price(self):
         return sum([item.get_total_price() for item in self.order_items.all()])
+
 
 class OrderedItem(models.Model):
     class Meta:
@@ -126,20 +128,6 @@ class OrderedItem(models.Model):
 
     def get_total_price(self):
         return self.menu_item.price * self.quantity
-
-
-class UserProfile(models.Model):
-    class Meta:
-        verbose_name = 'Профиль'
-        verbose_name_plural = 'Профили'
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='Пользователь')
-    bio = models.TextField(blank=True, null=True, verbose_name='О себе')
-    profile_picture = models.ImageField(upload_to='profile_pics', blank=True, null=True,
-                                        verbose_name='Фотография профиля')
-
-    def __str__(self):
-        return self.user.username
 
 
 class Promotion(models.Model):

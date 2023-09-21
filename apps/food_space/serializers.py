@@ -1,18 +1,18 @@
 from rest_framework import serializers
-from .models import FoodSpace, Image, Review, Reservation, MenuItem, Order, UserProfile, Promotion, Event, OrderedItem
+from .models import FoodSpace, Image, Review, Reservation, MenuItem, Order, Promotion, Event, OrderedItem
+from apps.users.models import CustomUser as User
 
 common_field = serializers.StringRelatedField(label='Общее поле')
-
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ('image',)
+        fields = ('image', 'id')
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    user = common_field
-    food_space = common_field
+    user = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
+    food_space = serializers.SlugRelatedField(slug_field='name', queryset=FoodSpace.objects.all())
 
     class Meta:
         model = Review
@@ -44,8 +44,8 @@ class OrderedItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderedItemSerializer(many=True, read_only=True)  # Добавьте write_only=True здесь
     price = serializers.SerializerMethodField(label='Общая сумма')
-    user = common_field
-    food_space = common_field
+    user = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
+    food_space = serializers.SlugRelatedField(slug_field='name', queryset=FoodSpace.objects.all())
     order_date = serializers.DateTimeField(format='%d.%m.%Y %H:%M:%S')
 
     class Meta:
@@ -54,12 +54,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_price(self, obj):
         return obj.get_total_price()
-
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = '__all__'
 
 
 class PromotionSerializer(serializers.ModelSerializer):

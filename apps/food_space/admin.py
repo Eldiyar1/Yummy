@@ -1,20 +1,16 @@
 from django.contrib import admin
-from .models import FoodSpace, Image, Review, Reservation, MenuItem, Order, UserProfile, Promotion, Event, OrderedItem
+from .models import FoodSpace, Image, Review, Reservation, MenuItem, Order, Promotion, Event, OrderedItem
 
 
-class ImageInline(admin.TabularInline):
+class FoodImageInline(admin.TabularInline):
     model = Image
-    min_num = 1
-    max_num = 10
-    extra = 0
-
 
 @admin.register(FoodSpace)
 class FoodSpaceAdmin(admin.ModelAdmin):
     list_display = ('name', 'city', 'cuisine', 'price_category')
     list_filter = ('city', 'cuisine', 'price_category')
     search_fields = ('name', 'city')
-    inlines = (ImageInline,)
+    inlines = [FoodImageInline]
 
 
 @admin.register(Review)
@@ -51,11 +47,6 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'food_space__name')
 
 
-@admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'bio')
-    search_fields = ('user__username',)
-
 
 @admin.register(Promotion)
 class PromotionAdmin(admin.ModelAdmin):
@@ -69,3 +60,4 @@ class EventAdmin(admin.ModelAdmin):
     list_display = ('title', 'food_space', 'start_date', 'end_date')
     list_filter = ('food_space', 'start_date', 'end_date')
     search_fields = ('title', 'food_space__name')
+

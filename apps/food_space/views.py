@@ -1,8 +1,7 @@
 from rest_framework import viewsets
-from .models import Review, Reservation, Order, UserProfile, Promotion, Event, MenuItem, FoodSpace, OrderedItem
-from .serializers import ReviewSerializer, ReservationSerializer, OrderSerializer, \
-    UserProfileSerializer, PromotionSerializer, EventSerializer, MenuItemSerializer, FoodSpaceSerializer, \
-    OrderedItemSerializer
+from .models import Review, Reservation, Order, Promotion, Event, MenuItem, FoodSpace
+from .serializers import ReviewSerializer, ReservationSerializer, OrderSerializer, PromotionSerializer, EventSerializer, \
+    MenuItemSerializer, FoodSpaceSerializer
 
 
 class FoodSpaceViewSet(viewsets.ModelViewSet):
@@ -28,11 +27,6 @@ class MenuItemViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-
-
-class UserProfileViewSet(viewsets.ModelViewSet):
-    queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
 
 
 class PromotionViewSet(viewsets.ModelViewSet):
